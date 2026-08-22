@@ -4,6 +4,8 @@
 #include<vector>
 #include<unistd.h>
 #include<sys/wait.h>
+#include<cerrno>
+#include<cstring>
 using namespace std;
 
 vector<string> pI(const string& input){
@@ -37,15 +39,15 @@ void executeCommand(const vector<string>& args){
 	if(pid==0)
 	{
 		execvp(argv[0], argv.data());
-		cerr<<"Sorry bro,Not possible right now...."<<endl;
-		exit(1);
+		cerr<<"avShell: "<<args[0] << ": " <<strerror(errno)<<'\n';
+		_exit(127);
 	}
 	int status;
-	waitpid(pid, &status, 0);
+	if(waitpid(pid, &status, 0)==-1){
+	cerr<<"avShell: waitpid failed\n";
+	}
 }
-	
-
-
+  
 int main(){
   string input;
   
@@ -61,6 +63,9 @@ int main(){
     if(args.empty()){
     continue;
     }
+    if(args[0] == "exit"){
+      break;
+     }
     executeCommand(args);
   }
   return 0;

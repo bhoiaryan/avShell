@@ -29,3 +29,24 @@ VERSION 1
         
         In Version 1.2:
         The core function of the shell is implemented, i.e fork(), execv(), and wait().
+        
+        I have implemented two major functions here parseInt() and executeCommand() functions in this version.
+        the parse function converts the command in one string to parts which are seperated by the delimiter spaces. it then stores them in the vector args and returs.
+        
+        the executeCommand first converts the args given by parseInput to type char* as execvp accpets this type and in args there is string data type.
+        
+        
+        Version 1.3:
+        
+        Here we just improve our shell by
+        
+        1) check if command is exit, if so then terminate
+        
+        2) i included error handling effiiently for execvp , in simple words for invalid commands
+        
+        3) checking if waitpid fails
+        
+        thats all for version 1..........
+        
+..................................__________________________________________.......................
+        
