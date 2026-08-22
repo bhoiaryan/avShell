@@ -1,21 +1,67 @@
 #include<iostream>
 #include<string>
+#include<sstream>
+#include<vector>
+#include<unistd.h>
+#include<sys/wait.h>
 using namespace std;
+
+vector<string> pI(const string& input){
+    stringstream ss(input);
+    vector<string> args;
+    string token;
+    
+    while(ss>>token){
+    args.push_back(token);
+    }
+    return args;
+    
+}
+
+void executeCommand(const vector<string>& args){
+	vector<char*> argv;
+	
+	for(const auto& a: args)
+	{
+		argv.push_back(const_cast<char*>(a.c_str()));
+	}
+	argv.push_back(nullptr);
+	
+	pid_t pid = fork();
+	
+	if(pid==-1)
+	{
+		cout<<"error"<<endl;
+		return;
+	}
+	if(pid==0)
+	{
+		execvp(argv[0], argv.data());
+		cerr<<"Sorry bro,Not possible right now...."<<endl;
+		exit(1);
+	}
+	int status;
+	waitpid(pid, &status, 0);
+}
+	
+
 
 int main(){
   string input;
   
   while(true){
-    cout<<"avShell$";
+    cout<<"avShell$ ";
     
     if(!getline(cin,input)){
       cout<<'\n';
       break;
     }
+    vector<string> args = pI(input);
     
-    cout<<"You entered: "<<input<<endl;
+    if(args.empty()){
+    continue;
+    }
+    executeCommand(args);
   }
-  
-  
   return 0;
 }

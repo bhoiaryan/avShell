@@ -23,3 +23,9 @@ and CMakeLists.txt is an instruction file for CMAKE. For now, think it as someth
 
 
 VERSION 1
+
+        In Version 1.1: I am taking input from user in a string and printing "You enetered: cmd";
+        
+        
+        In Version 1.2:
+        The core function of the shell is implemented, i.e fork(), execv(), and wait().
