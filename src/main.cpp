@@ -6,6 +6,7 @@
 #include<sys/wait.h>
 #include<cerrno>
 #include<cstring>
+#include "../include/builtins.h"
 using namespace std;
 
 vector<string> pI(const string& input){
@@ -25,7 +26,7 @@ void executeCommand(const vector<string>& args){
 	
 	for(const auto& a: args)
 	{
-		argv.push_back(const_cast<char*>(a.c_str()));
+		argv.push_back(const_cast<char*>(a.c_str()));// chr* -> char* 
 	}
 	argv.push_back(nullptr);
 	
@@ -63,8 +64,12 @@ int main(){
     if(args.empty()){
     continue;
     }
-    if(args[0] == "exit"){
-      break;
+    if(isBuiltin(args[0])){
+      int result = executeBuiltin(args);
+      if(result == 1){
+        break;
+        }
+        continue;
      }
     executeCommand(args);
   }
