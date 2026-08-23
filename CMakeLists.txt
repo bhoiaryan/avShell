@@ -10,3 +10,7 @@ add_executable(avShell
 	src/main.cpp
 	src/builtins.cpp
 )
+
+target_include_directories(avShell PRIVATE
+${CMAKE_SOURCE_DIR}/include
+)

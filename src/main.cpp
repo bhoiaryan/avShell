@@ -6,7 +6,7 @@
 #include<sys/wait.h>
 #include<cerrno>
 #include<cstring>
-#include "../include/builtins.h"
+#include "builtins.h"
 using namespace std;
 
 vector<string> pI(const string& input){

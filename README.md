@@ -50,3 +50,21 @@ VERSION 1
         
 ..................................__________________________________________.......................
         
+        
+        
+        VERSION 2
+        
+        here i have added more builtin commands: cd, echo, pwd, export and unset. 
+        
+        for  cd: chdir() function is used for changing the directory
+        
+        for pwd: getcwd() is used for getting the current working directory.
+        
+        for echo we just print things out with a loop.
+        
+        for export: setenv(name, value, 1)
+        
+        for unset: unsetenv(name)
+        
+        
+        the builtins.cpp is ugly right now. but it will be made cleaner later.

@@ -5,6 +5,6 @@
 
 bool isBuiltin(const std::string& command);
 
-int executeBuiltin(const std::vector<string>& args);
+int executeBuiltin(const std::vector<std::string>& args);
 
 
