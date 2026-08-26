@@ -9,6 +9,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_executable(avShell
 	src/main.cpp
 	src/builtins.cpp
+	src/lexer.cpp
+	src/parser.cpp
 )
 
 target_include_directories(avShell PRIVATE

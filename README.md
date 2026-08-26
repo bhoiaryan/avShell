@@ -68,3 +68,27 @@ VERSION 1
         
         
         the builtins.cpp is ugly right now. but it will be made cleaner later.
+        
+        
+>>>>>>>>>>>>>>>>>>>>-------------------------------------------<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+VERSION 3(Ps: for Vidhan only, start understanding now otherwise your pach pach pach is bound to happen.)
+    
+    VERAION 3.1 
+            here we are replacing the old stringstream tokeniser with a better one.
+            
+    VERSION 3.2
+            this version has a very lengthy and a bit complex code. you should use different inputs to test this and also dry run, if possible.
+            
+            in this version the lexer has 3 states: Normal, singleQuote and doubleQuote. depending on the current we change states.
+            from now echo "hello world", will work perfectly
+            
+    VERSION 3.3
+            here we have are now even classifing symbols like |(piping), <, >, >> (i/o redirection).
+            there a class Token in token.h which is the main figure head in this version.
+            
+    VERSION 3.4
+            here we have made a command data structure.
+            and integrated everything in main.
+        
+    
