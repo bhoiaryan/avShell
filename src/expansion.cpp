@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <cctype>
 
-std::string expandVariables(const std::string& input) {
+std::string expandVariables(const std::string& input, int lastExitStatus) {
     std::string result;
 
     for (size_t i = 0; i < input.size(); ++i) {
@@ -22,6 +22,13 @@ std::string expandVariables(const std::string& input) {
 
         // Variable names start with a letter or underscore.
         char next = input[i + 1];
+        
+        
+        if(next == '?'){
+          result+= std::to_string(lastExitStatus);
+          i++;
+          continue;
+        }
 
         if (!std::isalpha(static_cast<unsigned char>(next)) &&
             next != '_') {

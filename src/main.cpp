@@ -15,14 +15,14 @@
 
 using namespace std;
 
-void executeCommand(const Command& command) {
+int executeCommand(const Command& command) {
     if (command.arguments.empty()) {
-        return;
+        return 1;
     }
 
     if (!command.redirections.empty()) {
         cerr << "avShell: redirection is not supported yet\n";
-        return;
+        return 101;
     }
 
     vector<char*> argv;
@@ -37,7 +37,7 @@ void executeCommand(const Command& command) {
 
     if (pid == -1) {
         cout << "error" << endl;
-        return;
+        return 1;
     }
 
     if (pid == 0) {
@@ -57,10 +57,15 @@ void executeCommand(const Command& command) {
     if (waitpid(pid, &status, 0) == -1) {
         cerr << "avShell: waitpid failed\n";
     }
+    if(WIFEXITED(status)){
+      return WEXITSTATUS(status);
+    }
+    return 1;
 }
 
 int main() {
     string input;
+    int lastExitStatus = 0;
 
     while (true) {
         cout << "avShell$ ";
@@ -86,12 +91,12 @@ int main() {
             }
             for (auto& command : pipeline.commands) {
                 for (auto& arg : command.arguments) {
-                    arg = expandVariables(arg);
+                    arg = expandVariables(arg, lastExitStatus);
                 }
 
                 for (auto& redirection : command.redirections) {
                     redirection.target =
-                        expandVariables(redirection.target);
+                        expandVariables(redirection.target, lastExitStatus);
                 }
             }
 
@@ -102,16 +107,18 @@ int main() {
             }
 
             if (isBuiltin(command.arguments[0])) {
-                int result = executeBuiltin(command.arguments);
-
-                if (result == 1) {
+                BuiltinResult result = executeBuiltin(command.arguments);
+                
+                lastExitStatus = result.exitStatus;
+                
+                if (result.shouldExit) {
                     break;
                 }
 
                 continue;
             }
 
-            executeCommand(command);
+           lastExitStatus =  executeCommand(command);
         }
         catch (const exception& e) {
             cerr << "avShell: syntax error: "

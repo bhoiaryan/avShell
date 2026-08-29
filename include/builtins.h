@@ -5,6 +5,11 @@
 
 bool isBuiltin(const std::string& command);
 
-int executeBuiltin(const std::vector<std::string>& args);
+struct BuiltinResult {
+  bool shouldExit;
+  int  exitStatus;
+ };
+
+BuiltinResult executeBuiltin(const std::vector<std::string>& args);
 
 
