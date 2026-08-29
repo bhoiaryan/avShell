@@ -11,6 +11,7 @@
 #include "token.h"
 #include "parser.h"
 #include "lexer.h"
+#include "expansion.h"
 
 using namespace std;
 
@@ -82,6 +83,16 @@ int main() {
             if (pipeline.commands.empty()) {
                 cerr << "avShell: pipes are not supported yet\n";
                 continue;
+            }
+            for (auto& command : pipeline.commands) {
+                for (auto& arg : command.arguments) {
+                    arg = expandVariables(arg);
+                }
+
+                for (auto& redirection : command.redirections) {
+                    redirection.target =
+                        expandVariables(redirection.target);
+                }
             }
 
             Command& command = pipeline.commands[0];

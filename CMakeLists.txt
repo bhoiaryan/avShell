@@ -11,6 +11,7 @@ add_executable(avShell
 	src/builtins.cpp
 	src/lexer.cpp
 	src/parser.cpp
+	src/expansion.cpp
 )
 
 target_include_directories(avShell PRIVATE
