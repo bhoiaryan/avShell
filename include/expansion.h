@@ -1,5 +1,6 @@
 #pragma once
 
 #include <string>
+#include "token.h"
 
-std::string expandVariables(const std::string& input, int lastExitStatus);
+std::string expandToken(const Token& token, int lastExitStatus);

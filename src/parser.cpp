@@ -12,8 +12,9 @@ Pipeline parse(const std::vector<Token>& tokens) {
         const Token& token = tokens[i];
 
         if (token.type == TokenType::Word) {
-            currentCommand.arguments.push_back(token.value);
-        }
+              currentCommand.arguments.push_back(token.value);
+              currentCommand.argumentTokens.push_back(token);
+          }
 
         else if (token.type == TokenType::Pipe) {
             if (currentCommand.arguments.empty()) {

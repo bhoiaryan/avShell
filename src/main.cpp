@@ -84,20 +84,26 @@ int main() {
             }
 
             Pipeline pipeline = parse(tokens);
+            
+            
 
             if (pipeline.commands.empty()) {
                 cerr << "avShell: pipes are not supported yet\n";
                 continue;
             }
             for (auto& command : pipeline.commands) {
-                for (auto& arg : command.arguments) {
-                    arg = expandVariables(arg, lastExitStatus);
-                }
-
-                for (auto& redirection : command.redirections) {
-                    redirection.target =
-                        expandVariables(redirection.target, lastExitStatus);
-                }
+                for(size_t i=0; i<command.arguments.size();i++){
+                        command.arguments[i] =
+                        expandToken(
+                        command.argumentTokens[i],
+                        lastExitStatus
+                      );
+                  }
+                    
+               // for (auto& redirection : command.redirections) {
+               //     redirection.target =
+              //          expandVariables(redirection.target, lastExitStatus);
+                //}
             }
 
             Command& command = pipeline.commands[0];

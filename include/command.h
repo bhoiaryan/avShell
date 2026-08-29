@@ -1,8 +1,8 @@
 #pragma once
 
 #include <string>
-
 #include <vector>
+#include "token.h"
 
 enum class RedirectionType {
   Input,
@@ -19,6 +19,8 @@ struct Redirection {
 struct Command {
   std::vector<std::string> arguments;
   std::vector<Redirection> redirections;
+  
+  std::vector<Token> argumentTokens;
 };
 
 struct Pipeline {
