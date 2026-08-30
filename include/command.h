@@ -14,6 +14,8 @@ enum class RedirectionType {
 struct Redirection {
   RedirectionType type;
   std::string target;
+  
+  Token targetToken;
 };
 
 struct Command {

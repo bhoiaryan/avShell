@@ -6,6 +6,7 @@
 #include <sys/wait.h>
 #include <cerrno>
 #include <cstring>
+#include <fcntl.h>
 
 #include "builtins.h"
 #include "token.h"
@@ -15,16 +16,55 @@
 
 using namespace std;
 
+bool applyRedirections(const Command& command){
+  for(const auto& redirection : command.redirections){
+    
+    if(redirection.type == RedirectionType::Output){
+      
+      int fd = open(redirection.target.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+      
+      if(fd == -1){
+        std::perror("avShell: dup2");
+        close(fd);
+        return false;
+      }
+      if(dup2(fd, STDOUT_FILENO) == -1){
+        std::perror("avShell: dup2");
+        close(fd);
+        return false;
+      }
+      close(fd);
+    }
+    
+    else if(redirection.type == RedirectionType::Append){
+      int fd = open(redirection.target.c_str(), O_WRONLY | O_CREAT | O_APPEND, 0644);
+      
+      if(fd == -1){
+        std::perror("avShell: open");
+        return false;
+      }
+      
+      if(dup2(fd, STDOUT_FILENO) == -1){
+        std::perror("avShell: dup2");
+        close(fd);
+        return false;
+      }
+      close(fd);
+    }
+    else{
+      std::cerr<< "avShell: this redirection is not supported yet\n";
+      return false;
+    }
+    }
+    return true;
+  }
+
 int executeCommand(const Command& command) {
     if (command.arguments.empty()) {
         return 1;
     }
 
-    if (!command.redirections.empty()) {
-        cerr << "avShell: redirection is not supported yet\n";
-        return 101;
-    }
-
+    
     vector<char*> argv;
 
     for (const auto& a : command.arguments) {
@@ -41,6 +81,11 @@ int executeCommand(const Command& command) {
     }
 
     if (pid == 0) {
+        
+        if(!applyRedirections(command)) {
+            _exit(1);
+          }
+        
         execvp(argv[0], argv.data());
 
         cerr << "avShell: "
@@ -100,10 +145,10 @@ int main() {
                       );
                   }
                     
-               // for (auto& redirection : command.redirections) {
-               //     redirection.target =
-              //          expandVariables(redirection.target, lastExitStatus);
-                //}
+                for (auto& redirection : command.redirections) {
+                    redirection.target =
+                        expandToken(redirection.targetToken, lastExitStatus);
+                }
             }
 
             Command& command = pipeline.commands[0];

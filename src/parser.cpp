@@ -61,6 +61,7 @@ Pipeline parse(const std::vector<Token>& tokens) {
             }
 
             redirection.target = tokens[i + 1].value;
+            redirection.targetToken = tokens[i+1];
 
             currentCommand.redirections.push_back(
                 std::move(redirection)
