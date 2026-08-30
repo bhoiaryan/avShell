@@ -12,6 +12,7 @@
 #include "token.h"
 #include "parser.h"
 #include "lexer.h"
+#include "command.h"
 #include "expansion.h"
 
 using namespace std;
@@ -89,6 +90,146 @@ bool applyRedirections(const Command& command){
     return true;
   }
 
+bool executeBuiltinWithRedirections(
+    const Command& command,
+    BuiltinResult& result
+) {
+    int savedStdin = -1;
+    int savedStdout = -1;
+    int savedStderr = -1;
+
+    bool hasInput = false;
+    bool hasOutput = false;
+    bool hasError = false;
+
+    // Determine which file descriptors need to be saved.
+    for (const auto& redirection : command.redirections) {
+
+        if (redirection.type == RedirectionType::Input) {
+            hasInput = true;
+        }
+
+        else if (redirection.type == RedirectionType::Output ||
+                 redirection.type == RedirectionType::Append) {
+            hasOutput = true;
+        }
+
+        else if (redirection.type == RedirectionType::Error) {
+            hasError = true;
+        }
+    }
+
+    // Save stdin.
+    if (hasInput) {
+
+        savedStdin = dup(STDIN_FILENO);
+
+        if (savedStdin == -1) {
+            perror("avShell: dup");
+            return false;
+        }
+    }
+
+    // Save stdout.
+    if (hasOutput) {
+
+        std::cout.flush();
+
+        savedStdout = dup(STDOUT_FILENO);
+
+        if (savedStdout == -1) {
+            perror("avShell: dup");
+
+            if (savedStdin != -1) {
+                close(savedStdin);
+            }
+
+            return false;
+        }
+    }
+
+    // Save stderr.
+    if (hasError) {
+
+        std::cerr.flush();
+
+        savedStderr = dup(STDERR_FILENO);
+
+        if (savedStderr == -1) {
+            perror("avShell: dup");
+
+            if (savedStdin != -1) {
+                close(savedStdin);
+            }
+
+            if (savedStdout != -1) {
+                close(savedStdout);
+            }
+
+            return false;
+        }
+    }
+
+    // Apply the requested redirections.
+    if (!applyRedirections(command)) {
+
+        if (savedStdin != -1) {
+            dup2(savedStdin, STDIN_FILENO);
+            close(savedStdin);
+        }
+
+        if (savedStdout != -1) {
+            dup2(savedStdout, STDOUT_FILENO);
+            close(savedStdout);
+        }
+
+        if (savedStderr != -1) {
+            dup2(savedStderr, STDERR_FILENO);
+            close(savedStderr);
+        }
+
+        return false;
+    }
+
+    // Execute the builtin while redirection is active.
+    result = executeBuiltin(command.arguments);
+
+    // Flush buffered output before restoring descriptors.
+    std::cout.flush();
+    std::cerr.flush();
+
+    // Restore stdin.
+    if (savedStdin != -1) {
+
+        if (dup2(savedStdin, STDIN_FILENO) == -1) {
+            perror("avShell: restoring stdin");
+        }
+
+        close(savedStdin);
+    }
+
+    // Restore stdout.
+    if (savedStdout != -1) {
+
+        if (dup2(savedStdout, STDOUT_FILENO) == -1) {
+            perror("avShell: restoring stdout");
+        }
+
+        close(savedStdout);
+    }
+
+    // Restore stderr.
+    if (savedStderr != -1) {
+
+        if (dup2(savedStderr, STDERR_FILENO) == -1) {
+            perror("avShell: restoring stderr");
+        }
+
+        close(savedStderr);
+    }
+
+    return true;
+}
 int executeCommand(const Command& command) {
     if (command.arguments.empty()) {
         return 1;
@@ -188,16 +329,29 @@ int main() {
             }
 
             if (isBuiltin(command.arguments[0])) {
-                BuiltinResult result = executeBuiltin(command.arguments);
-                
-                lastExitStatus = result.exitStatus;
-                
-                if (result.shouldExit) {
-                    break;
-                }
+              BuiltinResult result;
 
-                continue;
-            }
+              if (command.redirections.empty()) {
+                  result = executeBuiltin(command.arguments);
+              }
+              else {
+                  if (!executeBuiltinWithRedirections(
+                          command,
+                          result)) {
+
+                      lastExitStatus = 1;
+                      continue;
+                  }
+              }
+
+              lastExitStatus = result.exitStatus;
+
+              if (result.shouldExit) {
+                  break;
+              }
+
+              continue;
+          }
 
            lastExitStatus =  executeCommand(command);
         }
