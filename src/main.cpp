@@ -51,6 +51,36 @@ bool applyRedirections(const Command& command){
       }
       close(fd);
     }
+    else if(redirection.type == RedirectionType::Input){
+      int fd = open(redirection.target.c_str(), O_RDONLY);
+      
+      if(fd == -1){
+        std::perror("avShell: open");
+        return false;
+      }
+      
+      if(dup2(fd, STDIN_FILENO) == -1){
+        std::perror("avShell: dup2");
+        close(fd);
+        return false;
+      }
+      close(fd);
+    }
+    else if(redirection.type == RedirectionType::Error){
+      int fd = open(redirection.target.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+      
+      if(fd == -1){
+        std::perror("avShell: open");
+        return false;
+      }
+      
+      if(dup2(fd, STDERR_FILENO) == -1){
+        std::perror("avShell: dup2");
+        close(fd);
+        return false;
+      }
+      close(fd);
+    }
     else{
       std::cerr<< "avShell: this redirection is not supported yet\n";
       return false;
